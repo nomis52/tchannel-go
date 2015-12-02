@@ -37,6 +37,7 @@ type TChanServer interface {
 	// Handle should read the request from the given reqReader, and return the response struct.
 	// The arguments returned are success, result struct, unexpected error
 	Handle(ctx Context, methodName string, protocol thrift.TProtocol) (success bool, resp thrift.TStruct, err error)
+	HandleArgs(ctx Context, methodName string, args interface{}) (success bool, resp thrift.TStruct, err error)
 
 	// Service returns the service name.
 	Service() string

@@ -89,25 +89,47 @@ func (s *tchanTCollectorServer) Methods() []string {
 }
 
 func (s *tchanTCollectorServer) Handle(ctx thrift.Context, methodName string, protocol athrift.TProtocol) (bool, athrift.TStruct, error) {
+	var args interface{}
+	var err error
 	switch methodName {
 	case "multi_submit":
-		return s.handleMultiSubmit(ctx, protocol)
+		args, err = s.readMultiSubmit(protocol)
+		if err != nil {
+			return false, nil, err
+		}
 	case "submit":
-		return s.handleSubmit(ctx, protocol)
+		args, err = s.readSubmit(protocol)
+		if err != nil {
+			return false, nil, err
+		}
+	default:
+		return false, nil, fmt.Errorf("method %v not found in service %v", methodName, s.Service())
+	}
+	return s.HandleArgs(ctx, methodName, args)
+}
 
+func (s *tchanTCollectorServer) HandleArgs(ctx thrift.Context, methodName string, args interface{}) (bool, athrift.TStruct, error) {
+	switch methodName {
+	case "multi_submit":
+		return s.handleMultiSubmit(ctx, args.(TCollectorMultiSubmitArgs))
+	case "submit":
+		return s.handleSubmit(ctx, args.(TCollectorSubmitArgs))
 	default:
 		return false, nil, fmt.Errorf("method %v not found in service %v", methodName, s.Service())
 	}
 }
 
-func (s *tchanTCollectorServer) handleMultiSubmit(ctx thrift.Context, protocol athrift.TProtocol) (bool, athrift.TStruct, error) {
+func (s *tchanTCollectorServer) readMultiSubmit(protocol athrift.TProtocol) (interface{}, error) {
 	var req TCollectorMultiSubmitArgs
-	var res TCollectorMultiSubmitResult
 
 	if err := req.Read(protocol); err != nil {
-		return false, nil, err
+		return nil, err
 	}
+	return req, nil
+}
 
+func (s *tchanTCollectorServer) handleMultiSubmit(ctx thrift.Context, req TCollectorMultiSubmitArgs) (bool, athrift.TStruct, error) {
+	var res TCollectorMultiSubmitResult
 	r, err :=
 		s.handler.MultiSubmit(ctx, req.Spans)
 
@@ -120,14 +142,17 @@ func (s *tchanTCollectorServer) handleMultiSubmit(ctx thrift.Context, protocol a
 	return err == nil, &res, nil
 }
 
-func (s *tchanTCollectorServer) handleSubmit(ctx thrift.Context, protocol athrift.TProtocol) (bool, athrift.TStruct, error) {
+func (s *tchanTCollectorServer) readSubmit(protocol athrift.TProtocol) (interface{}, error) {
 	var req TCollectorSubmitArgs
-	var res TCollectorSubmitResult
 
 	if err := req.Read(protocol); err != nil {
-		return false, nil, err
+		return nil, err
 	}
+	return req, nil
+}
 
+func (s *tchanTCollectorServer) handleSubmit(ctx thrift.Context, req TCollectorSubmitArgs) (bool, athrift.TStruct, error) {
+	var res TCollectorSubmitResult
 	r, err :=
 		s.handler.Submit(ctx, req.Span)
 

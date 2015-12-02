@@ -102,6 +102,16 @@ func (s *Service) Methods() []*Method {
 	return methods
 }
 
+// AllMethods returns the methods defined on this service and any
+// service it extends.
+func (s *Service) AllMethods() []*Method {
+	methods := s.Methods()
+	if s.HasExtends() {
+		methods = append(methods, s.ExtendsService.AllMethods()...)
+	}
+	return methods
+}
+
 // Method is a wrapper for parser.Method.
 type Method struct {
 	*parser.Method
@@ -120,7 +130,14 @@ func (m *Method) Name() string {
 	return goPublicName(m.Method.Name)
 }
 
-// HandleFunc is the go method name for the handle function which decodes the payload.
+// ReadFunc is the go method name for the read function which decodes
+// the payload.
+func (m *Method) ReadFunc() string {
+	return "read" + goPublicName(m.Method.Name)
+}
+
+// HandleFunc is the go method name for the handle function which
+// invokes the handler and packages the result.
 func (m *Method) HandleFunc() string {
 	return "handle" + goPublicName(m.Method.Name)
 }
