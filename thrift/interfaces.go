@@ -38,6 +38,7 @@ type TChanServer interface {
 	// The arguments returned are success, result struct, unexpected error
 	Handle(ctx Context, methodName string, protocol thrift.TProtocol) (success bool, resp thrift.TStruct, err error)
 	HandleArgs(ctx Context, methodName string, args interface{}) (success bool, resp thrift.TStruct, err error)
+	GetArgs(methodName string, protocol thrift.TProtocol) (args interface{}, err error)
 
 	// Service returns the service name.
 	Service() string
