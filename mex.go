@@ -22,6 +22,7 @@ package tchannel
 
 import (
 	"errors"
+	"runtime"
 	"sync"
 
 	"github.com/uber/tchannel-go/typed"
@@ -114,6 +115,13 @@ func (mex *messageExchange) recvPeerFrameOfType(msgType messageType) (*Frame, er
 		// TODO(mmihic): Should be treated as a protocol error
 		mex.mexset.log.Warnf("Received unexpected message %v, expected %v for %d",
 			frame.Header.messageType, msgType, frame.Header.ID)
+
+		// Log extra infromation for debugging.
+		stack := make([]byte, 4096)
+		n := runtime.Stack(stack, false /* all */)
+		stack = stack[:n]
+		mex.mexset.log.Warnf("Unexpected frame stack: %s", stack)
+		mex.mexset.log.Warnf("Unexpected frame contents: %x", frame.buffer[:frame.Header.FrameSize()])
 
 		return nil, errUnexpectedFrameType
 	}
