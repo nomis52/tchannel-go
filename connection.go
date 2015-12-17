@@ -654,6 +654,10 @@ func (c *Connection) readFrames(_ uint32) {
 			return
 		}
 
+		if c.log.Enabled(LogLevelDebug) {
+			c.log.Debugf("Read frame %v", frame.Header)
+		}
+
 		// call req and call res messages may not want the frame released immediately.
 		releaseFrame := true
 		switch frame.Header.messageType {
@@ -691,7 +695,7 @@ func (c *Connection) readFrames(_ uint32) {
 func (c *Connection) writeFrames(_ uint32) {
 	for f := range c.sendCh {
 		if c.log.Enabled(LogLevelDebug) {
-			c.log.Debugf("Writing frame %s", f.Header)
+			c.log.Debugf("Writing frame %v", f.Header)
 		}
 
 		err := f.WriteOut(c.conn)
