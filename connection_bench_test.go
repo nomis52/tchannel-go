@@ -198,3 +198,13 @@ func BenchmarkCallsConcurrentClient(b *testing.B) {
 		workersPerClient: parallelism,
 	})
 }
+
+func BenchmarkStress(b *testing.B) {
+	parallelism := runtime.GOMAXPROCS(0)
+	benchmarkCallsN(b, benchmarkConfig{
+		numCalls:         b.N,
+		numServers:       parallelism,
+		numClients:       1,
+		workersPerClient: 100,
+	})
+}
