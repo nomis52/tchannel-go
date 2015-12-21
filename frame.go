@@ -72,7 +72,9 @@ func (fh FrameHeader) FrameSize() uint16 {
 	return fh.size
 }
 
-func (fh FrameHeader) String() string { return fmt.Sprintf("%v[%d]", fh.messageType, fh.ID) }
+func (fh *FrameHeader) String() string {
+	return fmt.Sprintf("Frame[%p] %v[%d]", fh, fh.messageType, fh.ID)
+}
 
 func (fh *FrameHeader) read(r *typed.ReadBuffer) error {
 	fh.size = r.ReadUint16()

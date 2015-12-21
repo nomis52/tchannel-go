@@ -84,6 +84,11 @@ func (mex *messageExchange) recvPeerFrame() (*Frame, error) {
 
 	select {
 	case frame := <-mex.recvCh:
+		mex.mexset.log.Debugf("mex %v recvPeerFrame: %v", mex.msgID, frame.Header)
+		if frame.Header.ID != mex.msgID {
+			mex.mexset.log.Errorf("mex %v received an invalid message: %v", mex.msgID, frame.Header)
+			panic("panic maybe")
+		}
 		return frame, nil
 	case <-mex.ctx.Done():
 		return nil, GetContextError(mex.ctx.Err())
@@ -116,15 +121,16 @@ func (mex *messageExchange) recvPeerFrameOfType(msgType messageType) (*Frame, er
 
 	default:
 		// TODO(mmihic): Should be treated as a protocol error
-		mex.mexset.log.Warnf("Received unexpected message %v, expected %v for %d mex ID %v",
+		mex.mexset.log.Warnf("Received unexpected frame[%p]: %v  message %v, expected %v for %d mex ID %v",
+			frame, frame.Header,
 			frame.Header.messageType, msgType, frame.Header.ID, mex.msgID)
 
 		// Log extra infromation for debugging.
 		stack := make([]byte, 4096)
 		n := runtime.Stack(stack, false /* all */)
 		stack = stack[:n]
-		mex.mexset.log.Warnf("Unexpected frame stack: %s", stack)
-		mex.mexset.log.Warnf("Unexpected frame contents: %x", frame.buffer[:frame.Header.FrameSize()])
+		mex.mexset.log.Warnf("mex %v Unexpected frame stack: %s", mex.msgID, stack)
+		mex.mexset.log.Warnf("mex %v Unexpected frame contents: %x", mex.msgID, frame.buffer[:frame.Header.FrameSize()])
 
 		return nil, errUnexpectedFrameType
 	}
