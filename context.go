@@ -46,6 +46,9 @@ type IncomingCall interface {
 
 	// ShardKey returns the shard key from the ShardKey transport header.
 	ShardKey() string
+
+	// CallerHostPort returns the hostPort of the caller.
+	CallerHostPort() string
 }
 
 func getTChannelParams(ctx context.Context) *tchannelCtxParams {

@@ -259,6 +259,11 @@ func (call *InboundCall) ShardKey() string {
 	return call.headers[ShardKey]
 }
 
+// CallerHostPort returns the caller hostPort.
+func (call *InboundCall) CallerHostPort() string {
+	return call.conn.RemotePeerInfo().HostPort
+}
+
 // Reads the entire operation name (arg1) from the request stream.
 func (call *InboundCall) readOperation() error {
 	var arg1 []byte

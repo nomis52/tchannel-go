@@ -45,6 +45,11 @@ func (f *FakeIncomingCall) ShardKey() string {
 	return f.ShardKeyF
 }
 
+// CallerHostPort returns the caller hostPort.
+func (f *FakeIncomingCall) CallerHostPort() string {
+	return "0.0.0.0:0"
+}
+
 // NewIncomingCall creates an incoming call for tests.
 func NewIncomingCall(callerName string) tchannel.IncomingCall {
 	return &FakeIncomingCall{CallerNameF: callerName}
